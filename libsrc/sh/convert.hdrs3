@@ -1,0 +1,7 @@
+ls */hdr/*h |
+while read file
+do
+	cat $file |
+	sed 's?#include *<\([^>]*\.i\)>?#include "\1"?;' >/tmp/out.$$
+	cp /tmp/out.$$ $file
+done

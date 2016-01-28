@@ -1,0 +1,46 @@
+# Copyright (C) 2016, OMBT LLC and Mike A. Rumore
+# All rights reserved.
+# Contact: Mike A. Rumore, (mike.a.rumore@gmail.com)
+
+ifndef ROOT
+$(error ROOT is not set)
+endif
+ifndef PRODS
+$(error PRODS is not set)
+endif
+
+LIBRARYDIR = $(ROOT)/$(RELEASELIBDIR)
+
+INCLUDEDIR = $(ROOT)/$(RELEASEHDRDIR)
+
+CXX = g++
+CXXFLAGS = -g -DDEBUG -I$(INCLUDEDIR) -L$(LIBRARYDIR) 
+
+ifdef CXXEXTRAFLAGS
+CXXFLAGS += $(CXXEXTRAFLAGS)
+endif 
+
+define PRODS_template
+$(1):	$(1).cpp
+endef
+
+all:
+
+$(foreach prod, $(PRODS), $(eval $(call PRODS_template, $(prod))))
+
+test:	$(PRODS)
+
+clean:
+	-rm -f install
+	-rm -f *.o
+	-$(foreach prod, $(PRODS), rm -f $(prod);)
+
+install:
+	touch install
+
+backup:
+	bkup
+
+backupd:
+	bkup -d
+

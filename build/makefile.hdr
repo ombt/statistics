@@ -1,0 +1,39 @@
+# Copyright (C) 2016, OMBT LLC and Mike A. Rumore
+# All rights reserved.
+# Contact: Mike A. Rumore, (mike.a.rumore@gmail.com)
+
+ifndef ROOT
+$(error ROOT is not set)
+endif
+ifndef HDRS
+$(error HDRS is not set)
+endif
+
+ifndef RELEASEHDRDIR
+$(error RELEASEHDRDIR is not set)
+endif
+
+INCLUDEDIR = $(ROOT)/$(RELEASEHDRDIR)
+
+all:	install
+
+depend:
+
+install:	installinclude
+		touch install
+
+installinclude:	$(HDRS)
+		-test -d $(INCLUDEDIR) || mkdir -p $(INCLUDEDIR);
+		cp $(HDRS) $(INCLUDEDIR)
+		touch installinclude
+
+clean:
+		-rm install
+		-rm installinclude
+		-$(foreach hdr, $(HDRS), rm -f $(INCLUDEDIR)/$(hdr); )
+
+backup:
+		bkup
+
+backupd:
+		bkup -d

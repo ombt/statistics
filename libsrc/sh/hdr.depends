@@ -1,0 +1,137 @@
+#!/usr/bin/perl -w
+#
+# Copyright (C) 2010, OMBT LLC and Mike A. Rumore
+# All rights reserved.
+# Contact: Mike A. Rumore, (mike.a.rumore@gmail.com)
+#
+use strict;
+#
+use FileHandle;
+use File::Basename;
+use Getopt::Std;
+use Cwd;
+#
+my $cmd = $0;
+my $verbose = 0;
+#
+sub usage {
+	my ($arg0) = @_;
+	print <<EOF;
+
+usage: $arg0 [-?|-h] [-v] [directory_path]
+
+where:
+	-? - print usage.
+	-h - print usage.
+	-v - enable verbose.
+
+and [directory_parh] is the path where to start scanning. if 
+[directory] is not given, then the current directory is used.
+
+EOF
+}
+#
+sub get_all_hdrs {
+	my ($phdrs) = @_;
+	#
+	# glob list of headers and include files.
+	#
+	@{${phdrs}} = <*/hdr/*.[hi]>;
+}
+#
+sub get_all_hdr_hdrs {
+	my ($phdrs, $phdrhdrs) = @_;
+	#
+	foreach my $hdr (@{${phdrs}})
+	{
+		print "GET ALL HDR HDRS: ${hdr}\n" if ($verbose == 1);
+		#
+		open(FH, $hdr) or die $!;
+		my @buf = <FH>;
+		close(FH);
+		#
+		my @includes = grep (/^ *# *include *"[^"]*" *$/, @buf);
+		chomp(@includes);
+		#
+		foreach my $include (@includes)
+		{
+			$include =~ s/^[^"]*"([^"]*)".*$/$1/m;
+			$include =~ s/\//\/hdr\//m;
+			print "\tHEADER : ${include}\n" if ($verbose == 1);
+			push(@{$phdrhdrs->{$hdr}}, $include);
+		}
+	}
+}
+#
+sub get_all_hdr_depends {
+	my ($phdrs, $phdrhdrs, $phdrdeps) = @_;
+	#
+	print "STARTING HDR DEPENDS !!!\n" if ($verbose == 1);
+	#
+	my @current = ();
+	#
+	foreach my $hdr (@{${phdrs}})
+	{
+		@{${phdrdeps}->{$hdr}} = ();
+		#
+		print "HDR: ${hdr}\n";
+		#
+		next unless (exists ${phdrhdrs}->{$hdr});
+		print "\tHDR HDRS: @{${phdrhdrs}->{$hdr}}\n" if ($verbose == 1);
+		#
+		my @hdrstoexpand = ();
+		push @hdrstoexpand, @{${phdrhdrs}->{$hdr}};
+		#
+		my %seen = ();
+		#
+		while (@hdrstoexpand)
+		{
+			my $xhdr = pop @hdrstoexpand;
+			#
+			next if (exists $seen{$xhdr});
+			$seen{$xhdr} = 1;
+			#
+			push @{${phdrdeps}->{$hdr}}, $xhdr;
+			push @hdrstoexpand, @{${phdrhdrs}->{$xhdr}} if (exists ${phdrhdrs}->{$xhdr});
+		}
+		#
+		foreach my $hdrdep (sort @{${phdrdeps}->{$hdr}})
+		{
+			print "\tDEP HDR: ${hdrdep}\n";
+		}
+	}
+}
+#
+my %opts;
+if (getopts('?hv', \%opts) != 1) {
+	usage($cmd);
+	exit 2;
+}
+#
+foreach my $opt (%opts) {
+	if ($opt eq "h") {
+		usage($cmd);
+		exit 0;
+	} elsif ($opt eq "?") {
+		usage($cmd);
+		exit 0;
+	} elsif ($opt eq "v") {
+		$verbose = 1;
+	}
+}
+#
+if ($#ARGV >= 0) {
+	my $wd = shift @ARGV;
+	chdir($wd) or die "$!";
+}
+#
+my @hdrs;
+get_all_hdrs(\@hdrs);
+#
+my %hdrhdrs;
+get_all_hdr_hdrs(\@hdrs, \%hdrhdrs);
+#
+my %hdrdeps;
+get_all_hdr_depends(\@hdrs, \%hdrhdrs, \%hdrdeps);
+#
+exit 0;

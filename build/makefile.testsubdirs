@@ -1,0 +1,48 @@
+# Copyright (C) 2016, OMBT LLC and Mike A. Rumore
+# All rights reserved.
+# Contact: Mike A. Rumore, (mike.a.rumore@gmail.com)
+
+ifndef ROOT
+$(error ROOT is not set)
+endif
+ifndef TESTSUBDIRS
+$(error TESTSUBDIRS is not set)
+endif
+
+all:
+
+test:
+	for TESTSUBDIR in $(TESTSUBDIRS); do \
+		echo "make $$TESTSUBDIR"; \
+		(cd $$TESTSUBDIR; make test; ) ; \
+	done
+
+install:
+	for TESTSUBDIR in $(TESTSUBDIRS); do \
+		echo "install $$TESTSUBDIR"; \
+		(cd $$TESTSUBDIR; make install; ) ; \
+	done
+
+depend:
+	for TESTSUBDIR in $(TESTSUBDIRS); do \
+		echo "depend $$TESTSUBDIR"; \
+		(cd $$TESTSUBDIR; make depend; ) ; \
+	done
+
+backup:
+	for TESTSUBDIR in $(TESTSUBDIRS); do \
+		echo "backup $$TESTSUBDIR"; \
+		(cd $$TESTSUBDIR; make backup; ) ; \
+	done
+
+backupd:
+	for TESTSUBDIR in $(TESTSUBDIRS); do \
+		echo "backup -d $$TESTSUBDIR"; \
+		(cd $$TESTSUBDIR; make backupd; ) ; \
+	done
+
+clean:
+	for TESTSUBDIR in $(TESTSUBDIRS); do \
+		echo "clean $$TESTSUBDIR"; \
+		(cd $$TESTSUBDIR; make clean; ) ; \
+	done

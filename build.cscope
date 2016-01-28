@@ -1,0 +1,8 @@
+# Copyright (C) 2016, OMBT LLC and Mike A. Rumore
+# All rights reserved.
+# Contact: Mike A. Rumore, (mike.a.rumore@gmail.com)
+
+set -x
+find . -type f -print | 
+egrep '.*\.(cpp|h|y|l)$' >cscope.files
+cscope -buq

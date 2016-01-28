@@ -1,0 +1,61 @@
+# Copyright (C) 2016, OMBT LLC and Mike A. Rumore
+# All rights reserved.
+# Contact: Mike A. Rumore, (mike.a.rumore@gmail.com)
+
+LIBDIR = $(ROOT)/lib
+
+INCLUDEDIR = $(ROOT)/hdr
+
+CXX = g++
+CXXFLAGS = -g -DDEBUG -fPIC -shared -I. -I$(INCLUDEDIR)
+
+ifdef CXXEXTRAFLAGS
+CXXFLAGS += $(CXXEXTRAFLAGS)
+endif
+
+HDRS = $(addsuffix .h, $(basename $(FILES) ) )
+
+OBJS = $(addsuffix .o, $(basename $(FILES) ) )
+
+all:	installinclude libombt$(LIBNAME).so.$(OMBTVERSION)
+
+libombt$(LIBNAME).so.$(OMBTVERSION):	$(OBJS)
+		$(CXX) -shared \
+			-Wl,-soname,libombt$(LIBNAME).so.$(OMBTMAJORVERSION) \
+			-o libombt$(LIBNAME).so.$(OMBTVERSION) \
+			$(OBJS) \
+			-lc
+
+install:	installinclude installlib
+		touch install
+
+installlib:	libombt$(LIBNAME).so.$(OMBTVERSION)
+		-test -d $(LIBDIR) || mkdir -p $(LIBDIR);
+		cp libombt$(LIBNAME).so.$(OMBTVERSION) $(LIBDIR)/libombt$(LIBNAME).so.$(OMBTVERSION)
+		-rm -f $(LIBDIR)/libombt$(LIBNAME).so
+		-rm -f $(LIBDIR)/libombt$(LIBNAME).so.$(OMBTMAJORVERSION)
+		ln -s $(LIBDIR)/libombt$(LIBNAME).so.$(OMBTVERSION) $(LIBDIR)/libombt$(LIBNAME).so.$(OMBTMAJORVERSION)
+		ln -s $(LIBDIR)/libombt$(LIBNAME).so.$(OMBTVERSION) $(LIBDIR)/libombt$(LIBNAME).so
+		touch installlib
+
+installinclude:	$(HDRS)
+		-test -d $(INCLUDEDIR)/$(LIBNAME) || mkdir -p $(INCLUDEDIR)/$(LIBNAME);
+		cp $(HDRS) $(INCLUDEDIR)/$(LIBNAME)
+		touch installinclude
+
+clean:
+		-rm installinclude
+		-rm installlib
+		-rm install
+		-rm -f $(OBJS)
+		-rm -f libombt$(LIBNAME).so.$(OMBTVERSION)
+		-$(foreach hdr, $(HDRS), rm -f $(INCLUDEDIR)/$(LIBNAME)/$(hdr); )
+		-rm -f $(LIBDIR)/libombt$(LIBNAME).so
+		-rm -f $(LIBDIR)/libombt$(LIBNAME).so.$(OMBTMAJORVERSION)
+		-rm -f $(LIBDIR)/libombt$(LIBNAME).so.$(OMBTVERSION)
+
+backup:
+		bkup
+
+backupd:
+		bkup -d

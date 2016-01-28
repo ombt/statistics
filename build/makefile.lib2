@@ -1,0 +1,102 @@
+# Copyright (C) 2016, OMBT LLC and Mike A. Rumore
+# All rights reserved.
+# Contact: Mike A. Rumore, (mike.a.rumore@gmail.com)
+
+ifndef ROOT
+$(error ROOT is not set)
+endif
+
+LIBRARYDIR = $(ROOT)/$(RELEASELIBDIR)
+
+INCLUDEDIR = $(ROOT)/$(RELEASEHDRDIR)
+
+ifdef FILES
+
+CXX = g++
+
+# CXXFLAGS = -g -O0 -DDEBUG -fPIC -shared -I. -Ihdr -I$(INCLUDEDIR)
+CXXFLAGS = -g -O0 -DDEBUG -fPIC -shared -I. -I$(INCLUDEDIR)
+
+ifdef CXXEXTRAFLAGS
+CXXFLAGS += $(CXXEXTRAFLAGS)
+endif
+
+HDRS += $(addsuffix .h, $(basename $(FILES) ) )
+
+CLEANHDRS := $(HDRS)
+
+HDRS := $(addprefix hdr/, $(HDRS) )
+
+OBJS = $(addprefix obj/, $(addsuffix .o, $(basename $(FILES) ) ) )
+
+obj/%.o: src/%.cpp
+	$(COMPILE.cpp) $(OUTPUT_OPTION) $<
+
+all:	installinclude libombt$(LIBNAME).so.$(OMBTVERSION)
+
+libombt$(LIBNAME).so.$(OMBTVERSION):	$(OBJS)
+		$(CXX) -shared \
+			-Wl,-soname,libombt$(LIBNAME).so.$(OMBTMAJORVERSION) \
+			-o libombt$(LIBNAME).so.$(OMBTVERSION) \
+			$(OBJS) \
+			-lc
+
+install:	installinclude installlib
+		touch install
+else
+
+ifndef HDRS
+$(error HDRS is not set)
+endif
+
+CLEANHDRS := $(HDRS)
+
+HDRS := $(addprefix hdr/, $(HDRS) )
+
+all:	installinclude
+
+install:	installinclude 
+		touch install
+endif
+
+installinclude:	$(HDRS)
+		-test -d $(INCLUDEDIR)/$(LIBNAME) || mkdir -p $(INCLUDEDIR)/$(LIBNAME);
+		cp $(HDRS) $(INCLUDEDIR)/$(LIBNAME)
+		touch installinclude
+
+ifdef FILES
+installlib:	libombt$(LIBNAME).so.$(OMBTVERSION)
+		-test -d $(LIBRARYDIR) || mkdir -p $(LIBRARYDIR);
+		cp libombt$(LIBNAME).so.$(OMBTVERSION) $(LIBRARYDIR)/libombt$(LIBNAME).so.$(OMBTVERSION)
+		-rm -f $(LIBRARYDIR)/libombt$(LIBNAME).so
+		-rm -f $(LIBRARYDIR)/libombt$(LIBNAME).so.$(OMBTMAJORVERSION)
+		ln -s $(LIBRARYDIR)/libombt$(LIBNAME).so.$(OMBTVERSION) $(LIBRARYDIR)/libombt$(LIBNAME).so.$(OMBTMAJORVERSION)
+		ln -s $(LIBRARYDIR)/libombt$(LIBNAME).so.$(OMBTVERSION) $(LIBRARYDIR)/libombt$(LIBNAME).so
+		touch installlib
+
+clean:
+		-rm installinclude
+		-rm installlib
+		-rm install
+		-rm -f $(OBJS)
+		-rm -f libombt$(LIBNAME).so.$(OMBTVERSION)
+		-$(foreach hdr, $(CLEANHDRS), rm -f $(INCLUDEDIR)/$(LIBNAME)/$(hdr); )
+		-rm -f $(LIBRARYDIR)/libombt$(LIBNAME).so
+		-rm -f $(LIBRARYDIR)/libombt$(LIBNAME).so.$(OMBTMAJORVERSION)
+		-rm -f $(LIBRARYDIR)/libombt$(LIBNAME).so.$(OMBTVERSION)
+
+else
+clean:
+		-rm installinclude
+		-rm install
+		-$(foreach hdr, $(CLEANHDRS), rm -f $(INCLUDEDIR)/$(LIBNAME)/$(hdr); )
+endif
+
+depend:
+		../libsrc.depends
+
+backup:
+		bkup
+
+backupd:
+		bkup -d

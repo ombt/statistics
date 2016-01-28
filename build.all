@@ -1,0 +1,7 @@
+# Copyright (C) 2016, OMBT LLC and Mike A. Rumore
+# All rights reserved.
+# Contact: Mike A. Rumore, (mike.a.rumore@gmail.com)
+
+set -x
+. build.env
+(make depend 2>&1; make 2>&1; make install 2>&1; make test 2>&1 ) | tee /tmp/build.all.out

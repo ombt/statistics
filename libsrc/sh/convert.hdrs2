@@ -1,0 +1,7 @@
+ls */src/*cpp |
+while read file
+do
+	cat $file |
+	sed 's?#include *"\([^/]*\)"?#include "hdr/\1"?;' >/tmp/out.$$
+	cp /tmp/out.$$ $file
+done

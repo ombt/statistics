@@ -1,0 +1,62 @@
+# Copyright (C) 2016, OMBT LLC and Mike A. Rumore
+# All rights reserved.
+# Contact: Mike A. Rumore, (mike.a.rumore@gmail.com)
+
+ifndef ROOT
+$(error ROOT is not set)
+endif
+ifndef PRODS
+$(error PRODS is not set)
+endif
+
+LIBRARYDIR = $(ROOT)/$(RELEASELIBDIR)
+
+INCLUDEDIR = $(ROOT)/$(RELEASEHDRDIR)
+
+BINARYDIR = $(ROOT)/$(RELEASEBINDIR)
+
+CXX = g++
+CXXFLAGS = -g -DDEBUG -I$(INCLUDEDIR) -L$(LIBRARYDIR) 
+
+ifdef CXXEXTRAFLAGS
+CXXFLAGS += $(CXXEXTRAFLAGS)
+endif 
+
+define PRODS_template
+$(1):	$(1).cpp
+	$(CXX) $(CXXFLAGS) -o $(1) $(1).cpp $(CXXLIBFLAGS)
+endef
+
+all:
+
+$(foreach prod, $(PRODS), $(eval $(call PRODS_template, $(prod))))
+
+all:	$(PRODS)
+
+clean:
+	-rm -f install
+	-rm -f *.o
+	-$(foreach prod, $(PRODS), rm -f $(prod);)
+ifndef NOINSTALL
+	-$(foreach prod, $(PRODS), rm -f $(BINARYDIR)/$(prod);)
+endif
+
+ifndef NOINSTALL
+install:	$(PRODS)
+	-test -d $(BINARYDIR) || mkdir -p $(BINARYDIR);
+	-$(foreach prod, $(PRODS), cp $(prod) $(BINARYDIR)/$(prod); )
+	-$(foreach prod, $(PRODS), chmod 755 $(BINARYDIR)/$(prod); )
+	touch install
+else
+install:
+	touch install
+endif
+
+depend:
+
+backup:
+	bkup
+
+backupd:
+	bkup -d
+

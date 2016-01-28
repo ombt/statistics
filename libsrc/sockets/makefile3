@@ -1,0 +1,16 @@
+# ROOT = /home/ombt/ombt
+
+ifndef ROOT
+ROOT = $(PWD)/../..
+endif
+
+include $(ROOT)/build/makefile.common
+
+# CXXEXTRAFLAGS = -Wfatal-errors
+
+LIBNAME = sockets
+
+FILES = Socket.cpp Address.cpp InetAddress.cpp LocalAddress.cpp EndPoint.cpp Service.cpp
+
+include $(ROOT)/build/makefile.lib3
+

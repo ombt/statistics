@@ -1,0 +1,24 @@
+CC = CC
+CCFLAGS = -DDEBUG -g 
+#
+LD = CC
+LDFLAGS = -DDEBUG -g 
+#
+tgstring
+tgstring.c
+gstring.c
+random.c
+#
+ttrie
+ttrie.c
+trie.c
+gstring.c
+queue_List.c
+mylist.c
+#
+myspell
+spell.c
+trie.c
+gstring.c
+queue_List.c
+mylist.c

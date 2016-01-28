@@ -1,0 +1,26 @@
+# Copyright (C) 2016, OMBT LLC and Mike A. Rumore
+# All rights reserved.
+# Contact: Mike A. Rumore, (mike.a.rumore@gmail.com)
+
+# common file for all make files
+
+# relative output directories
+BUILDDIR = build
+LIBDIR = lib
+BINDIR = bin
+HDRDIR = hdr
+
+# overall software version
+OMBTMAJORVERSION = 2
+OMBTMINORVERSION = 0
+OMBTVERSION = $(OMBTMAJORVERSION).$(OMBTMINORVERSION)
+
+# release directory
+RELEASEDIR = release/$(OMBTVERSION)
+
+# release subdirectories
+RELEASELIBDIR = $(RELEASEDIR)/$(LIBDIR)
+RELEASEBINDIR = $(RELEASEDIR)/$(BINDIR)
+RELEASEHDRDIR = $(RELEASEDIR)/$(HDRDIR)
+RELEASEBUILDDIR = $(RELEASEDIR)/$(BUILDDIR)
+

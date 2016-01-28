@@ -1,0 +1,125 @@
+//
+// Copyright (C) 2010, OMBT LLC and Mike A. Rumore
+// All rights reserved.
+// Contact: Mike A. Rumore, (mike.a.rumore@gmail.com)
+//
+// server base class
+
+// headers
+#include "hdr/Server.h"
+
+namespace ombt {
+
+// ctors and dtor
+Server::Server():
+    UCBaseObject(true), nfds_(0), maxfd_(0), handlers_()
+{
+    clearFDSetsForAllConnections();
+}
+
+Server::~Server()
+{
+    clearFDSetsForAllConnections();
+    handlers_.clear();
+}
+
+// register and unregister handlers with server
+int
+Server::registerHandler(Connection &connection, Handler &handler)
+{
+    // only one handler per connection allowed -- for now.
+    std::pair<std::map<Connection, Handler>::iterator, bool> ret;
+    ret = handlers_.insert(std::pair<Connection, Handler>(connection, handler));
+    if (ret.second)
+    {
+        setFDSetsForConnection(connection);
+        return(0);
+    }
+    else
+        return(-1);
+}
+
+int
+Server::unregisterHandler(const Connection &connection)
+{
+    if (handlers_.erase(connection) == 1)
+    {
+        clearFDSetsForConnection(connection);
+        return(0);
+    }
+    else
+        return(-1);
+}
+
+// operations
+int
+Server::init()
+{
+    return(setFDSetsForAllConnections());
+}
+
+int
+Server::run()
+{
+    return(0);
+}
+
+int
+Server::finish()
+{
+    clearFDSetsForAllConnections();
+    return(0);
+}
+
+// utilities
+void
+Server::setFDSetsForConnection(const Connection &connection)
+{
+    int socket = connection.getSocket();
+#if 0
+    if (flags & CheckForRead) FD_SET(socket, &readfds_);
+    if (flags & CheckForWrite) FD_SET(socket, &writefds_);
+    if (flags & CheckForException) FD_SET(socket, &exceptfds_);
+#endif
+}
+
+void
+Server::clearFDSetsForConnection(const Connection &connection)
+{
+    nfds_ = 0;
+    maxfd_ = 0;
+    FD_CLR(connection.getSocket(), &readfds_);
+    FD_CLR(connection.getSocket(), &writefds_);
+    FD_CLR(connection.getSocket(), &exceptfds_);
+}
+
+int
+Server::setFDSetsForAllConnections(unsigned int flags)
+{
+    // clear all data
+    nfds_ = 0;
+    maxfd_ = -1;
+    FD_ZERO(&readfds_);
+    FD_ZERO(&writefds_);
+    FD_ZERO(&exceptfds_);
+
+    // do we have any sockets?
+    if (handlers_.empty()) return(-1);
+
+    // mark the sets
+    std::map<Connection, Handler>::const_iterator hit = handlers_.begin();
+    std::map<Connection, Handler>::const_iterator hitend = handlers_.end();
+    for (nfds_ = 0; hit != hitend; ++hit, ++nfds_)
+    {
+        int socket = hit->first.getSocket();
+        if (socket > maxfd_) maxfd_ = socket;
+        if (flags & CheckForRead) FD_SET(socket, &readfds_);
+        if (flags & CheckForWrite) FD_SET(socket, &writefds_);
+        if (flags & CheckForException) FD_SET(socket, &exceptfds_);
+    }
+    if (maxfd_ != -1) maxfd_ += 1;
+
+    return(0);
+}
+
+}

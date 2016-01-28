@@ -1,0 +1,26 @@
+# Copyright (C) 2016, OMBT LLC and Mike A. Rumore
+# All rights reserved.
+# Contact: Mike A. Rumore, (mike.a.rumore@gmail.com)
+
+INCLUDEDIR = $(ROOT)/hdr
+
+all:	install
+
+install:	installinclude
+		touch install
+
+installinclude:	$(HDRS)
+		-test -d $(INCLUDEDIR)/$(LIBNAME) || mkdir -p $(INCLUDEDIR)/$(LIBNAME);
+		cp $(HDRS) $(INCLUDEDIR)/$(LIBNAME)
+		touch installinclude
+
+clean:
+		-rm install
+		-rm installinclude
+		-$(foreach hdr, $(HDRS), rm -f $(INCLUDEDIR)/$(LIBNAME)/$(hdr); )
+
+backup:
+		bkup
+
+backupd:
+		bkup -d

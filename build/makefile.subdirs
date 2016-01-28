@@ -1,0 +1,48 @@
+# Copyright (C) 2016, OMBT LLC and Mike A. Rumore
+# All rights reserved.
+# Contact: Mike A. Rumore, (mike.a.rumore@gmail.com)
+
+ifndef ROOT
+$(error ROOT is not set)
+endif
+ifndef SUBDIRS
+$(error SUBDIRS is not set)
+endif
+
+all:
+	for SUBDIR in $(SUBDIRS); do \
+		echo "make $$SUBDIR"; \
+		(cd $$SUBDIR; make; ) ; \
+	done
+
+install:
+	for SUBDIR in $(SUBDIRS); do \
+		echo "install $$SUBDIR"; \
+		(cd $$SUBDIR; make install; ) ; \
+	done
+
+depend:
+	for SUBDIR in $(SUBDIRS); do \
+		echo "depend $$SUBDIR"; \
+		(cd $$SUBDIR; make depend; ) ; \
+	done
+
+backup:
+	for SUBDIR in $(SUBDIRS); do \
+		echo "backup $$SUBDIR"; \
+		(cd $$SUBDIR; make backup; ) ; \
+	done
+
+backupd:
+	for SUBDIR in $(SUBDIRS); do \
+		echo "backup -d $$SUBDIR"; \
+		(cd $$SUBDIR; make backupd; ) ; \
+	done
+
+clean:
+	for SUBDIR in $(SUBDIRS); do \
+		echo "clean $$SUBDIR"; \
+		(cd $$SUBDIR; make clean; ) ; \
+	done
+
+

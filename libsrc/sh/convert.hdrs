@@ -1,0 +1,8 @@
+ls */hdr/*h */src/*cpp |
+while read file
+do
+	cat $file |
+	sed 's?\(Returns.h\)?system/\1?;
+s?\(Debug.h\)?system/\1?;' >/tmp/out.$$
+	cp /tmp/out.$$ $file
+done
