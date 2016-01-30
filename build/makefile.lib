@@ -7,7 +7,7 @@ LIBDIR = $(ROOT)/lib
 INCLUDEDIR = $(ROOT)/hdr
 
 CXX = g++
-CXXFLAGS = -g -DDEBUG -fPIC -shared -I. -I$(INCLUDEDIR)
+CXXFLAGS = -g -std=c++11 -DDEBUG -fPIC -shared -I. -I$(INCLUDEDIR)
 
 ifdef CXXEXTRAFLAGS
 CXXFLAGS += $(CXXEXTRAFLAGS)
